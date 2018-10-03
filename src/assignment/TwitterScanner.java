@@ -32,38 +32,45 @@ public final class TwitterScanner {
 		}
 	}
 
+	
+	static Calendar cal = Calendar.getInstance();
 	static int counter = 0; //Counter to count number of tweets per hour
-	static int arrayHour=0; //Hour check to trigger store of number of tweets
-	static Map<Integer, Integer> result = new HashMap<Integer, Integer>(); //Hashmap to store dateid, count of hours results
-	static long[] followArray= {}; //followArray, function of the Twitter API to choose userid's to search
-	static String[] companyName = {"Facebook"}; //Company name that we are targeting
+	static int lastDateId = 10311; //Store for last date id to use to calculate percentage change in tweets
+	static int arrayHour=11; //Hour check to trigger store of number of tweets, initialise with current hour
+	static Map<Integer, Integer> result = new HashMap<>(Map.of(10308,1,10309,3,10310,7,10311,1)); //Hashmap to store dateid, count of hours results, initialised with test values
+	static long[] followArray= {}; //followArray, function of the Twitter API to choose userid's to search, empty for this example
+	static String[] companyName = {"Tesla"}; //Company name that we are targeting
     public static void main(String[] args) throws TwitterException {
         TwitterStream twitterStream = new TwitterStreamFactory().getInstance().addListener(new StatusListener() {
-            @Override
+        	@Override
             public void onStatus(Status status) {
-            	SimpleDateFormat dateFormatter = new SimpleDateFormat("mdh"); //Specifying format for date id 
+            	SimpleDateFormat dateFormatter = new SimpleDateFormat("MMdH"); //Specifying format for date id monthdayhour
             	Date Date = status.getCreatedAt(); //Taking the date the tweet was created
-            	Calendar cal = Calendar.getInstance();
-            	Integer dateid = Integer.parseInt(dateFormatter.format(Date));
-            	result.put(dateid,0); //Initialising result with dateid and 0
+            	Integer dateId = Integer.parseInt(dateFormatter.format(Date)); //
             	cal.setTime(Date);
             	int currentHour = cal.get(Calendar.HOUR_OF_DAY);
-                System.out.println("Current Hour =" + currentHour);
-                System.out.println("Current counter ="+counter);
+//              System.out.println("Current Hour =" + currentHour);
+//              System.out.println("Current arrayHour ="+arrayHour);
+//              System.out.println("Current counter ="+counter);
+//            	System.out.println(Arrays.asList(result));
+//            	System.out.println(dateId);
+            	counter++;
                 if (currentHour != arrayHour) {
                 	arrayHour = currentHour;
-                	result.put(dateid+1,counter);
+                	result.put(dateId,counter);
                 	if (result.size()==0) {
                 		int change = 0;
                 		storeValue(Instant.now(), change);
+                    	System.out.println(Arrays.asList(result));
+                    	lastDateId = dateId;
                 	} else {
-                		int change = (counter-result.get(dateid-1)/result.get(dateid))*100;
-                		storeValue(Instant.now(), change);
+	            		int change = (counter-result.get(lastDateId)/result.get(dateId))*100; //calculate percentage change in tweets since last hour
+	            		storeValue(Instant.now(), change); //store value in TSValue
+	                	lastDateId = dateId;
+
                 	}
-                	counter=-1;
-                	System.out.println(Arrays.asList(result));
+                	counter=-1; // Reset counter for next hour
                 };
-                counter++;
             }
 
             @Override
@@ -98,8 +105,8 @@ public final class TwitterScanner {
     
     protected static void storeValue(Instant ts, int count) {
     	TSValue a = new TSValue(ts, count);
-    	System.out.println(a.timestamp.toString());
-    	System.out.println(a.getVal());
+    	System.out.println("For timestamp = "+a.timestamp.toString());
+    	System.out.println("Percentage change = "+a.getVal());
     	
 	}
 
