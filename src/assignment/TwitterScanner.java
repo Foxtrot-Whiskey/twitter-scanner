@@ -4,14 +4,10 @@ import twitter4j.*; //library for managing twitter api
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public final class TwitterScanner {
@@ -49,11 +45,6 @@ public final class TwitterScanner {
             	Integer dateId = Integer.parseInt(dateFormatter.format(Date)); //
             	cal.setTime(Date);
             	int currentHour = cal.get(Calendar.HOUR_OF_DAY);
-//              System.out.println("Current Hour =" + currentHour);
-//              System.out.println("Current arrayHour ="+arrayHour);
-//              System.out.println("Current counter ="+counter);
-//            	System.out.println(Arrays.asList(result));
-//            	System.out.println(dateId);
             	counter++;
                 if (currentHour != arrayHour) {
                 	arrayHour = currentHour;
